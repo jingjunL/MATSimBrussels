@@ -182,7 +182,41 @@ public class createPopulation {
             String noActivityAgent = null;
 
             while ((noActivityAgent = noActivityReader.readLine()) != null){
+//                Extract the information
                 String[] noActivityAgentSplited = noActivityAgent.split(",");
+                int noActivityAgentID = Integer.parseInt(noActivityAgentSplited[0]);
+                String noActivityAgentHousehold = noActivityAgentSplited[1];
+                String noActivityAgentAgegroup = noActivityAgentSplited[4];
+                String noActivityAgentGender = noActivityAgentSplited[5].equals("1") ? "m" :"f";
+                String noActivityAgentHighestDegree = noActivityAgentSplited[6];
+                String noActivityAgentIncome = noActivityAgentSplited[7];
+                String noActivityAgentCarAvailability = noActivityAgentSplited[8];
+                String noActivityAgentWorkingStatus = noActivityAgentSplited[9];
+                String noActivityAgentHomeNB = noActivityAgentSplited[10];
+
+//                Set attributes for these agents
+                Person noActivityPerson = populationFactory.createPerson(Id.createPersonId(noActivityAgentID));
+                noActivityPerson.getAttributes().putAttribute("householdID", noActivityAgentHousehold);
+                noActivityPerson.getAttributes().putAttribute("homeNB", noActivityAgentHomeNB);
+                PersonUtils.setSex(noActivityPerson, noActivityAgentGender);
+                noActivityPerson.getAttributes().putAttribute("ageGroup", noActivityAgentAgegroup);
+                noActivityPerson.getAttributes().putAttribute("highestDegree", noActivityAgentHighestDegree);
+                noActivityPerson.getAttributes().putAttribute("incomeLevel", noActivityAgentIncome);
+                PersonUtils.setCarAvail(noActivityPerson, noActivityAgentCarAvailability);
+                noActivityPerson.getAttributes().putAttribute("workingStatus", noActivityAgentWorkingStatus);
+                noActivityPerson.getAttributes().putAttribute("subpopulation", "person");
+
+//                Also, get the home coordinate from the attribute file for adding plan
+                double noActivityXHomeCoord = Double.parseDouble(noActivityAgentSplited[2]);
+                double noActivityYHomeCoord = Double.parseDouble(noActivityAgentSplited[3]);
+
+//                Add one single at home trip for these no activity agents
+                Plan noActivityPlan = populationFactory.createPlan();
+                Activity noActivityActivity = populationFactory.createActivityFromCoord("home_90000", new Coord(noActivityXHomeCoord, noActivityYHomeCoord));
+
+                noActivityPlan.addActivity(noActivityActivity);
+                noActivityPerson.addPlan(noActivityPlan);
+                population.addPerson(noActivityPerson);
 
             }
         } catch (IOException e) {
