@@ -1,4 +1,4 @@
-package org.matsim.preparation;
+package org.matsim.testAndPlayground;
 
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.matsim.api.core.v01.TransportMode;
@@ -19,22 +19,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-// OSM file downloaded from: http://download.geofabrik.de/europe/belgium.html, transfer to CRS EPSG 31370
-
-/**
- * This class puts all motorways and primary roads into the MATSim network. If a link is contained in the supplied shape, also minor and
- * residential raods are put into the MATsim network.
- * After parsing the OSM-data, unreachable areas of the network are removed by using the network cleaner
- */
-
-public class createNetworkFromOSM {
-
+public class osmTest {
     private static String BelgiumCRS = "EPSG:31370";
     private static Path input = Paths.get("scenarios/BrusselsNetworkFromOSM/belgium-latest.osm.pbf");
     private static Path filterShape = Paths.get("scenarios/BrusselsShapefile/UrbAdm_MONITORING_DISTRICT.shp");
 
     public static void main(String[] args) throws MalformedURLException {
-        new createNetworkFromOSM().create();
+        new osmTest().create();
     }
 
     private void create() throws MalformedURLException {
@@ -53,12 +44,7 @@ public class createNetworkFromOSM {
         SupersonicOsmNetworkReader reader = new SupersonicOsmNetworkReader.Builder()
                 .setCoordinateTransformation(transformation)
                 .setIncludeLinkAtCoordWithHierarchy((coord, hierarchyLevel) -> {
-
-                    // take all links which are motorway, trunk, or primary-street regardless of their location
-                    if (hierarchyLevel <= LinkProperties.LEVEL_PRIMARY) return true;
-
-                    // whithin the shape, take all links which are contained in the osm-file
-                    return ShpGeometryUtils.isCoordInPreparedGeometries(coord, filterGeometries);
+                    return true;
                 })
                 .setAfterLinkCreated((link, osmTags, direction) -> {
 
@@ -79,7 +65,7 @@ public class createNetworkFromOSM {
         new NetworkCleaner().run(network);
 
         // write out the network into a file
-        new NetworkWriter(network).write("scenarios/BrusselsScenario/network.xml.gz");
+        new NetworkWriter(network).write("scenarios/BrusselsScenario/networkWithoutPT.xml.gz");
     }
 
 }
